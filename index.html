@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Translation Job Finder for 2025</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        :root {
+            --glow-color: hsl(190, 100%, 70%); /* A global, watery blue glow */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #030712; /* bg-gray-950 */
+            color: #f9fafb; /* text-gray-50 */
+        }
+        .glowing-btn {
+            position: relative;
+            color: var(--glow-color);
+            cursor: pointer;
+            padding: 0.5em 1.2em;
+            border: 0.1em solid var(--glow-color);
+            border-radius: 0.45em;
+            background: none;
+            perspective: 2em;
+            font-family: "Inter", sans-serif;
+            font-size: 0.9em;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            -webkit-box-shadow: inset 0px 0px 0.5em 0px var(--glow-color),
+                0px 0px 0.5em 0px var(--glow-color);
+            -moz-box-shadow: inset 0px 0px 0.5em 0px var(--glow-color),
+                0px 0px 0.5em 0px var(--glow-color);
+            box-shadow: inset 0px 0px 0.5em 0px var(--glow-color),
+                0px 0px 0.5em 0px var(--glow-color);
+            transition: all 0.3s ease;
+        }
+        .glowing-btn:hover {
+            color: #030712;
+            background-color: var(--glow-color);
+            -webkit-box-shadow: 0px 0px 1em 0px var(--glow-color);
+            -moz-box-shadow: 0px 0px 1em 0px var(--glow-color);
+            box-shadow: 0px 0px 1em 0px var(--glow-color);
+        }
+        .details-container {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out, padding-top 0.5s ease-in-out;
+        }
+        .details-container.open {
+            max-height: 500px; /* Adjust as needed to fit content */
+            padding-top: 1.5rem; /* Equivalent to mt-6 */
+        }
+        .glowing-number {
+            color: #fff;
+            text-shadow:
+                0 0 5px #fff,
+                0 0 10px #fff,
+                0 0 20px var(--glow-color),
+                0 0 30px var(--glow-color),
+                0 0 40px var(--glow-color);
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useMemo } = React;
+
+        // --- Data for the platforms ---
+        const platformData = [
+            {
+                id: 1,
+                name: 'ProZ.com',
+                link: 'https://www.proz.com/',
+                payRate: 'Set your own rates',
+                rating: 4.5,
+                pros: ['Largest community of translators', 'Huge job board with many opportunities', 'Excellent for networking and building a reputation'],
+                cons: ['Membership often required for best jobs', 'Very high competition', 'More of a job board than a direct employer'],
+                description: 'The world\'s largest online community and marketplace for language professionals. It\'s an essential resource for finding clients, networking, and accessing industry tools.',
+                jobTypes: ['General', 'Legal', 'Medical', 'Technical', 'Localization'],
+                bestFor: 'Professionals'
+            },
+            {
+                id: 2,
+                name: 'Gengo',
+                link: 'https://gengo.com/translators/',
+                payRate: '$0.03 - $0.10 / word',
+                rating: 4.0,
+                pros: ['Great for beginners to get started', 'Clear instructions and easy-to-use platform', 'No bidding for jobs'],
+                cons: ['Pay rates are on the lower end', 'Strict quality reviews', 'Work can be inconsistent'],
+                description: 'A popular platform for new translators to gain experience. Gengo provides a steady stream of smaller jobs with a straightforward workflow and clear expectations.',
+                jobTypes: ['General', 'E-commerce', 'Travel', 'Social Media'],
+                bestFor: 'Beginners'
+            },
+            {
+                id: 3,
+                name: 'Unbabel',
+                link: 'https://unbabel.com/community/',
+                payRate: '$8 - $18 / hour (approx.)',
+                rating: 3.8,
+                pros: ['Work with AI-assisted translations', 'Focus on editing, not translating from scratch', 'Weekly payments'],
+                cons: ['Pay can be lower than traditional translation', 'Requires adapting to a specific workflow', 'Work volume can fluctuate'],
+                description: 'An AI-powered translation platform that hires human editors to review and perfect machine translations, primarily for customer service content.',
+                jobTypes: ['Post-Editing', 'Customer Service', 'Localization'],
+                bestFor: 'Editors & Tech-savvy Linguists'
+            },
+            {
+                id: 4,
+                name: 'Translated',
+                link: 'https://www.translated.com/jobs',
+                payRate: 'Varies by project',
+                rating: 4.2,
+                pros: ['Work with major international clients', 'Uses proprietary CAT tools', 'Long-standing, reputable company'],
+                cons: ['Application process can be lengthy', 'Pay rates can be average', 'Requires use of their specific software'],
+                description: 'A large, professional translation agency that has been operating for over 20 years. They work with a global network of freelance translators on projects for major brands.',
+                jobTypes: ['General', 'Technical', 'Marketing', 'Website Localization'],
+                bestFor: 'Experienced Translators'
+            },
+            {
+                id: 5,
+                name: 'TextMaster',
+                link: 'https://www.textmaster.com/freelance-translator',
+                payRate: 'Up to €0.15 / word',
+                rating: 4.1,
+                pros: ['Tiered system allows for higher pay', 'Good platform for European languages', 'Clear and user-friendly interface'],
+                cons: ['Difficult to advance to higher levels', 'Lower levels have low pay rates', 'Strict quality control'],
+                description: 'A European-based professional translation service that connects clients with skilled translators. Your pay rate increases as you level up through their quality system.',
+                jobTypes: ['General', 'E-commerce', 'Marketing', 'Technical'],
+                bestFor: 'All Levels'
+            },
+            {
+                id: 6,
+                name: 'Stepes',
+                link: 'https://www.stepes.com/translator-application/',
+                payRate: 'Varies by project',
+                rating: 3.9,
+                pros: ['Mobile-first platform (translate on your phone)', 'Focus on quick, on-demand translations', 'Innovative approach'],
+                cons: ['Fewer long-form document projects', 'App-based work isn\'t for everyone', 'Still growing its client base'],
+                description: 'A modern, mobile-centric translation platform that allows you to translate and get paid directly from your smartphone, ideal for shorter, faster tasks.',
+                jobTypes: ['Short-form', 'Social Media', 'Customer Service', 'Interpretation'],
+                bestFor: 'Mobile Users'
+            }
+        ];
+
+        // --- SVG Icons ---
+        const StarIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
+                <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.007z" clipRule="evenodd" />
+            </svg>
+        );
+
+        const CheckIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={className}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        );
+
+        const XCircleIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={className}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        );
+        
+        const LightbulbIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.311a7.5 7.5 0 00-7.5 0c.065.21.145.421.24.632l.008.017a.25.25 0 00.416.016l.21-.419a.25.25 0 01.416 0l.21.419a.25.25 0 00.416 0l.21-.419a.25.25 0 01.416 0l.21.419a.25.25 0 00.416 0l.21-.419a.25.25 0 01.416 0l.21.419a.25.25 0 00.416 0l.24-.632a7.5 7.5 0 00-7.5-7.5zm-3.75 7.478a12.06 12.06 0 004.5 0" />
+            </svg>
+        );
+
+        // --- Platform Card Component ---
+        function PlatformCard({ platform }) {
+            const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
+            return (
+                <div className="bg-gray-900 border border-gray-700/50 rounded-xl p-6 transition-all duration-300 flex flex-col">
+                    {/* Base content of the card */}
+                    <div className="flex-grow">
+                        <div className="flex justify-between items-start">
+                            <h2 className="text-xl sm:text-2xl font-bold text-white">{platform.name}</h2>
+                            <div className="flex items-center gap-1 bg-gray-800 px-3 py-1 rounded-full flex-shrink-0">
+                                <StarIcon className="w-5 h-5 text-yellow-400" />
+                                <span className="font-bold text-white">{platform.rating.toFixed(1)}</span>
+                            </div>
+                        </div>
+                        <p className="text-gray-300 mt-2 text-md font-semibold">{platform.payRate}</p>
+                        <p className="text-gray-400 mt-1 text-sm">Specialties: {platform.jobTypes.join(', ')}</p>
+                        <p className="text-gray-400 mt-1 text-sm">Best For: {platform.bestFor}</p>
+                    </div>
+
+                    <div className="mt-6 flex flex-wrap items-center gap-4">
+                         <a href={platform.link} target="_blank" rel="noopener noreferrer" className="inline-block">
+                             <button className="glowing-btn">
+                                VISIT SITE
+                             </button>
+                         </a>
+                         <button 
+                            onClick={() => setIsPreviewOpen(!isPreviewOpen)} 
+                            className="glowing-btn" 
+                            style={{"--glow-color": "hsl(280, 100%, 75%)"}}>
+                            {isPreviewOpen ? 'HIDE' : 'DETAILS'}
+                         </button>
+                    </div>
+                    
+                    {/* The expanding/collapsing details container */}
+                    <div className={`details-container ${isPreviewOpen ? 'open' : ''}`}>
+                        <h3 className="text-lg font-semibold text-white mb-2">Overview</h3>
+                        <p className="text-gray-300 mb-4 text-sm">{platform.description}</p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <h4 className="font-semibold text-green-400 mb-2">Pros</h4>
+                                <ul className="space-y-1">
+                                    {platform.pros.map((pro, i) => (
+                                        <li key={i} className="flex items-start gap-2 text-sm text-gray-300">
+                                            <CheckIcon className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                                            <span>{pro}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                             <div>
+                                <h4 className="font-semibold text-red-400 mb-2">Cons</h4>
+                                <ul className="space-y-1">
+                                    {platform.cons.map((con, i) => (
+                                        <li key={i} className="flex items-start gap-2 text-sm text-gray-300">
+                                            <XCircleIcon className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                                            <span>{con}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // --- Filters Component ---
+        function Filters({ filters, setFilters, allJobTypes }) {
+             const handleSearchChange = (e) => {
+                setFilters(prev => ({ ...prev, searchTerm: e.target.value }));
+            };
+            
+            const handleSortChange = (e) => {
+                setFilters(prev => ({ ...prev, sortBy: e.target.value }));
+            };
+            
+            const handleJobTypeChange = (e) => {
+                setFilters(prev => ({ ...prev, jobType: e.target.value }));
+            };
+
+            return (
+                <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-4 mb-8 backdrop-blur-sm lg:sticky top-4 z-20">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="flex flex-col gap-2">
+                            <label htmlFor="search" className="text-sm font-medium text-gray-300">Search by Name</label>
+                            <input
+                                type="text"
+                                id="search"
+                                placeholder="e.g., Gengo"
+                                value={filters.searchTerm}
+                                onChange={handleSearchChange}
+                                className="bg-gray-800 border border-gray-700 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                            />
+                        </div>
+                         <div className="flex flex-col gap-2">
+                            <label htmlFor="jobType" className="text-sm font-medium text-gray-300">Specialization</label>
+                            <select
+                                id="jobType"
+                                value={filters.jobType}
+                                onChange={handleJobTypeChange}
+                                className="bg-gray-800 border border-gray-700 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                            >
+                                <option value="All">All Specializations</option>
+                                {allJobTypes.map(type => <option key={type} value={type}>{type}</option>)}
+                            </select>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                            <label htmlFor="sort" className="text-sm font-medium text-gray-300">Sort By</label>
+                            <select
+                                id="sort"
+                                value={filters.sortBy}
+                                onChange={handleSortChange}
+                                className="bg-gray-800 border border-gray-700 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                            >
+                                <option value="rating_desc">Rating: High to Low</option>
+                                <option value="rating_asc">Rating: Low to High</option>
+                                <option value="name_asc">Name: A to Z</option>
+                                <option value="name_desc">Name: Z to A</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+        
+        // --- Tips Section ---
+        function TipsSection() {
+            const tips = [
+                { title: 'Specialize in a Niche', description: 'Translators with expertise in high-demand fields like legal, medical, or technical writing can command much higher rates.' },
+                { title: 'Master CAT Tools', description: 'Proficiency in Computer-Assisted Translation (CAT) tools like SDL Trados or MemoQ is essential for professional translators.' },
+                { title: 'Build a Strong Portfolio', description: 'Showcase your best work and highlight your areas of expertise to attract high-quality clients and agencies.' },
+                { title: 'Never Stop Learning', description: 'Languages are always evolving. Stay current with cultural nuances and new terminology in your language pairs to ensure high-quality work.'}
+            ];
+
+            return (
+                <div className="mt-16">
+                    <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 text-white">Tips for Translator Success</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {tips.map(tip => (
+                            <div key={tip.title} className="bg-gray-900/50 border border-gray-800 rounded-lg p-6">
+                                <div className="flex items-center gap-3">
+                                    <LightbulbIcon className="w-6 h-6 text-yellow-400" />
+                                    <h3 className="text-lg font-semibold text-white">{tip.title}</h3>
+                                </div>
+                                <p className="mt-2 text-gray-400 text-sm">{tip.description}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        // --- Main App Component ---
+        function App() {
+            const [filters, setFilters] = useState({
+                sortBy: 'rating_desc',
+                searchTerm: '',
+                jobType: 'All'
+            });
+
+            const allJobTypes = useMemo(() => {
+                const types = new Set();
+                platformData.forEach(p => p.jobTypes.forEach(t => types.add(t)));
+                return Array.from(types).sort();
+            }, []);
+
+            const filteredAndSortedPlatforms = useMemo(() => {
+                let filtered = platformData.filter(p => 
+                    p.name.toLowerCase().includes(filters.searchTerm.toLowerCase())
+                );
+
+                if (filters.jobType !== 'All') {
+                    filtered = filtered.filter(p => p.jobTypes.includes(filters.jobType));
+                }
+
+                return filtered.sort((a, b) => {
+                    switch (filters.sortBy) {
+                        case 'rating_desc':
+                            return b.rating - a.rating;
+                        case 'rating_asc':
+                            return a.rating - b.rating;
+                        case 'name_asc':
+                            return a.name.localeCompare(b.name);
+                        case 'name_desc':
+                            return b.name.localeCompare(a.name);
+                        default:
+                            return 0;
+                    }
+                });
+            }, [filters]);
+
+            return (
+                <div className="min-h-screen bg-gray-950 text-gray-50 p-4 sm:p-6 lg:p-8">
+                    <div className="max-w-7xl mx-auto">
+                        <header className="text-center my-6 sm:my-8 md:my-12">
+                            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white">Translation Job Finder</h1>
+                             <div className="mt-4 text-base sm:text-lg text-gray-400">
+                                Showing <span className="text-2xl font-bold glowing-number">{filteredAndSortedPlatforms.length}</span> of <span className="font-bold text-white">{platformData.length}</span> platforms
+                            </div>
+                            <p className="mt-2 text-base sm:text-lg text-gray-400 max-w-2xl mx-auto">Find the best platforms for remote translation work.</p>
+                        </header>
+
+                        <main>
+                            <Filters filters={filters} setFilters={setFilters} allJobTypes={allJobTypes} />
+                            
+                            {filteredAndSortedPlatforms.length > 0 ? (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                    {filteredAndSortedPlatforms.map(platform => (
+                                        <PlatformCard key={platform.id} platform={platform} />
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-16 px-4 bg-gray-900 rounded-lg">
+                                    <h3 className="text-xl font-semibold text-white">No Platforms Found</h3>
+                                    <p className="text-gray-400 mt-2">Try adjusting your filters to find more results.</p>
+                                </div>
+                            )}
+                            
+                            <TipsSection />
+                        </main>
+                        
+                        <footer className="text-center mt-12 py-6 border-t border-gray-800">
+                            <p className="text-sm text-gray-500">Pay rates and information are based on publicly available data and may change.</p>
+                        </footer>
+                    </div>
+                </div>
+            );
+        }
+
+        const container = document.getElementById('root');
+        const root = ReactDOM.createRoot(container);
+        root.render(<App />);
+    </script>
+</body>
+</html>
